@@ -1,12 +1,11 @@
 extern crate actix_web;
 
 use actix_web::{http, server, App, HttpRequest, HttpResponse};
-use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader, SeekFrom};
 use std::sync::{mpsc, Arc, Mutex};
-use std::thread;
+use std::{env, fs, thread};
 
 struct AppState {
     channel: mpsc::Sender<usize>,
@@ -73,6 +72,11 @@ fn main() -> io::Result<()> {
         let _ = destination.write(&contents);
     });
 
+    let port = env::var("PORT")
+        .unwrap_or_else(|_| "3000".to_string())
+        .parse()
+        .expect("PORT required");
+
     server::new(move || {
         let sender = mpsc::Sender::clone(&tx);
         App::with_state(AppState {
@@ -81,8 +85,8 @@ fn main() -> io::Result<()> {
         })
         .resource("/", |r| r.method(http::Method::GET).f(index))
     })
-    .bind("127.0.0.1:8080")
-    .unwrap()
+    .bind(("0.0.0.0", port))
+    .expect("Could not bind to port")
     .run();
 
     Ok(())

@@ -1,0 +1,6 @@
+#!/bin/sh
+
+echo "Creating world.txt";
+sort -R nouns.txt > world.txt;
+echo "...$(wc -l < world.txt) words";
+echo "Done";

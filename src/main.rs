@@ -77,6 +77,8 @@ fn main() -> io::Result<()> {
         .parse()
         .expect("PORT required");
 
+    println!("Starting on port {}", port);
+
     server::new(move || {
         let sender = mpsc::Sender::clone(&tx);
         App::with_state(AppState {
@@ -86,7 +88,7 @@ fn main() -> io::Result<()> {
         .resource("/", |r| r.method(http::Method::GET).f(index))
     })
     .bind(("0.0.0.0", port))
-    .expect(format!("Could not bind to port {}", port))
+    .expect("Could not bind to port")
     .run();
 
     Ok(())

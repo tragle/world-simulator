@@ -86,7 +86,7 @@ fn main() -> io::Result<()> {
         .resource("/", |r| r.method(http::Method::GET).f(index))
     })
     .bind(("0.0.0.0", port))
-    .expect("Could not bind to port")
+    .expect(format!("Could not bind to port {}", port))
     .run();
 
     Ok(())

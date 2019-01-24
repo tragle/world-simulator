@@ -48,14 +48,14 @@ fn main() -> io::Result<()> {
         let _r = rx.recv().unwrap();
         let mut contents = vec![];
         {
-            let source = File::open("world.txt").expect("No world");
+            let source = File::open("./world.txt").expect("No world");
             let mut file_reader = BufReader::new(&source);
             let mut line_buf = String::new();
             let _ = file_reader.read_line(&mut line_buf);
             let len = &line_buf.len();
 
             if line_buf.is_empty() {
-                fs::remove_file("world.txt").expect("Can't remove world");
+                fs::remove_file("./world.txt").expect("Can't remove world");
                 panic!();
             }
 
@@ -68,7 +68,7 @@ fn main() -> io::Result<()> {
                 .read_to_end(&mut contents)
                 .expect("Can't read world");
         }
-        let mut destination = File::create("world.txt").expect("Can't create world");
+        let mut destination = File::create("./world.txt").expect("Can't create world");
         let _ = destination.write(&contents);
     });
 

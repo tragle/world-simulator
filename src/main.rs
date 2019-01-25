@@ -41,6 +41,16 @@ fn index(req: &HttpRequest<AppState>) -> HttpResponse {
 }
 
 fn main() -> io::Result<()> {
+    let filename = env::args()
+        .nth(1)
+        .unwrap_or_else(|| "world.txt".to_string());
+    let port = env::args()
+        .nth(2)
+        .unwrap_or_else(|| "3000".to_string())
+        .parse()
+        .expect("Could not parse port");
+    let world = filename.clone();
+
     let mutex = Arc::new(Mutex::new("".to_owned()));
     let mutex_copy = mutex.clone();
     let (tx, rx) = mpsc::channel();
@@ -48,14 +58,14 @@ fn main() -> io::Result<()> {
         let _r = rx.recv().unwrap();
         let mut contents = vec![];
         {
-            let source = File::open("./world.txt").expect("No world");
+            let source = File::open(&world).expect("No world");
             let mut file_reader = BufReader::new(&source);
             let mut line_buf = String::new();
             let _ = file_reader.read_line(&mut line_buf);
             let len = &line_buf.len();
 
             if line_buf.is_empty() {
-                fs::remove_file("./world.txt").expect("Can't remove world");
+                fs::remove_file(&world).expect("Can't remove world");
                 panic!();
             }
 
@@ -68,16 +78,11 @@ fn main() -> io::Result<()> {
                 .read_to_end(&mut contents)
                 .expect("Can't read world");
         }
-        let mut destination = File::create("./world.txt").expect("Can't create world");
+        let mut destination = File::create(&world).expect("Can't create world");
         let _ = destination.write(&contents);
     });
 
-    let port = env::var("PORT")
-        .unwrap_or_else(|_| "3000".to_string())
-        .parse()
-        .expect("PORT required");
-
-    println!("Starting on port {}", port);
+    println!("Starting with {} on port {}", filename, port);
 
     server::new(move || {
         let sender = mpsc::Sender::clone(&tx);
